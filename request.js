@@ -1,42 +1,42 @@
 'use strict'
 
 var http = require('http')
-  , https = require('https')
-  , url = require('url')
-  , util = require('util')
-  , stream = require('stream')
-  , zlib = require('zlib')
-  , bl = require('bl')
-  , hawk = require('hawk')
-  , aws2 = require('aws-sign2')
-  , aws4 = require('aws4')
-  , httpSignature = require('http-signature')
-  , mime = require('mime-types')
-  , stringstream = require('stringstream')
-  , caseless = require('caseless')
-  , ForeverAgent = require('forever-agent')
-  , FormData = require('form-data')
-  , extend = require('extend')
-  , isstream = require('isstream')
-  , isTypedArray = require('is-typedarray').strict
-  , helpers = require('./lib/helpers')
-  , cookies = require('./lib/cookies')
-  , getProxyFromURI = require('./lib/getProxyFromURI')
-  , Querystring = require('./lib/querystring').Querystring
-  , Har = require('./lib/har').Har
-  , Auth = require('./lib/auth').Auth
-  , OAuth = require('./lib/oauth').OAuth
-  , Multipart = require('./lib/multipart').Multipart
-  , Redirect = require('./lib/redirect').Redirect
-  , Tunnel = require('./lib/tunnel').Tunnel
+    , https = require('https')
+    , url = require('url')
+    , util = require('util')
+    , stream = require('stream')
+    , zlib = require('zlib')
+    , bl = require('bl')
+    , hawk = require('hawk')
+    , aws2 = require('aws-sign2')
+    , aws4 = require('aws4')
+    , httpSignature = require('http-signature')
+    , mime = require('mime-types')
+    , stringstream = require('stringstream')
+    , caseless = require('caseless')
+    , ForeverAgent = require('forever-agent')
+    , FormData = require('form-data')
+    , extend = require('extend')
+    , isstream = require('isstream')
+    , isTypedArray = require('is-typedarray').strict
+    , helpers = require('./lib/helpers')
+    , cookies = require('./lib/cookies')
+    , getProxyFromURI = require('./lib/getProxyFromURI')
+    , Querystring = require('./lib/querystring').Querystring
+    , Har = require('./lib/har').Har
+    , Auth = require('./lib/auth').Auth
+    , OAuth = require('./lib/oauth').OAuth
+    , Multipart = require('./lib/multipart').Multipart
+    , Redirect = require('./lib/redirect').Redirect
+    , Tunnel = require('./lib/tunnel').Tunnel
 
 var safeStringify = helpers.safeStringify
-  , isReadStream = helpers.isReadStream
-  , toBase64 = helpers.toBase64
-  , defer = helpers.defer
-  , copy = helpers.copy
-  , version = helpers.version
-  , globalCookieJar = cookies.jar()
+    , isReadStream = helpers.isReadStream
+    , toBase64 = helpers.toBase64
+    , defer = helpers.defer
+    , copy = helpers.copy
+    , version = helpers.version
+    , globalCookieJar = cookies.jar()
 
 
 var globalPool = {}
@@ -292,7 +292,7 @@ Request.prototype.init = function (options) {
     self.setHeader(hostHeaderName, self.uri.hostname)
     if (self.uri.port) {
       if ( !(self.uri.port === 80 && self.uri.protocol === 'http:') &&
-           !(self.uri.port === 443 && self.uri.protocol === 'https:') ) {
+          !(self.uri.port === 443 && self.uri.protocol === 'https:') ) {
         self.setHeader(hostHeaderName, self.getHeader('host') + (':' + self.uri.port) )
       }
     }
@@ -378,10 +378,10 @@ Request.prototype.init = function (options) {
     }
 
     self.auth(
-      options.auth.user,
-      options.auth.pass,
-      options.auth.sendImmediately,
-      options.auth.bearer
+        options.auth.user,
+        options.auth.pass,
+        options.auth.sendImmediately,
+        options.auth.bearer
     )
   }
 
@@ -451,8 +451,8 @@ Request.prototype.init = function (options) {
   }
 
   var protocol = self.proxy && !self.tunnel ? self.proxy.protocol : self.uri.protocol
-    , defaultModules = {'http:':http, 'https:':https}
-    , httpModules = self.httpModules || {}
+      , defaultModules = {'http:':http, 'https:':https}
+      , httpModules = self.httpModules || {}
 
   self.httpModule = httpModules[protocol] || defaultModules[protocol]
 
@@ -815,19 +815,21 @@ Request.prototype.onRequestError = function (error) {
 
 Request.prototype.onRequestResponse = function (response) {
   var self = this
-  debug('onRequestResponse', self.uri.href, response.statusCode, response.headers)
+  dn('onRequestResponse', self.uri.href, response.statusCode, response.headers)
   response.on('end', function() {
     if (self.timing) {
       self.elapsedTime += (new Date().getTime() - self.startTime)
       debug('elapsed time', self.elapsedTime)
       response.elapsedTime = self.elapsedTime
     }
-    debug('response end', self.uri.href, response.statusCode, response.headers)
+    dn('response end', self.uri.href, response.statusCode, response.headers)
   })
 
   if (self._aborted) {
-    debug('aborted', self.uri.href)
-    response.resume()
+    dn( 'Aborted', self.uri.href );
+    dn( 'Response: ', response );
+    //response.xhr.resume();
+    //response.resume()
     return
   }
 
@@ -899,13 +901,13 @@ Request.prototype.onRequestResponse = function (response) {
 
     var noBody = function (code) {
       return (
-        self.method === 'HEAD'
-        // Informational
-        || (code >= 100 && code < 200)
-        // No Content
-        || code === 204
-        // Not Modified
-        || code === 304
+          self.method === 'HEAD'
+          // Informational
+          || (code >= 100 && code < 200)
+          // No Content
+          || code === 204
+          // Not Modified
+          || code === 304
       )
     }
 
@@ -990,7 +992,7 @@ Request.prototype.readResponseBody = function (response) {
   var self = this
   debug('reading response\'s body')
   var buffer = bl()
-    , strings = []
+      , strings = []
 
   self.on('data', function (chunk) {
     if (Buffer.isBuffer(chunk)) {
@@ -1050,9 +1052,11 @@ Request.prototype.abort = function () {
   self._aborted = true
 
   if (self.req) {
-    self.req.abort()
+    dn("abort URL: ", self.req);
+    self.req.xhr.abort()
   }
   else if (self.response) {
+    dn("destroy response: ", self.response);
     self.response.destroy()
   }
 
@@ -1134,8 +1138,8 @@ Request.prototype.form = function (form) {
       self.setHeader('content-type', 'application/x-www-form-urlencoded')
     }
     self.body = (typeof form === 'string')
-      ? self._qs.rfc3986(form.toString('utf8'))
-      : self._qs.stringify(form).toString('utf8')
+        ? self._qs.rfc3986(form.toString('utf8'))
+        : self._qs.stringify(form).toString('utf8')
     return self
   }
   // create form-data object
@@ -1215,8 +1219,8 @@ Request.prototype.getHeader = function (name, headers) {
 Request.prototype.enableUnixSocket = function () {
   // Get the socket & request paths from the URL
   var unixParts = this.uri.path.split(':')
-    , host = unixParts[0]
-    , path = unixParts[1]
+      , host = unixParts[0]
+      , path = unixParts[1]
   // Apply unix properties to request
   this.socketPath = host
   this.uri.pathname = path
@@ -1265,14 +1269,14 @@ Request.prototype.aws = function (opts, now) {
     var date = new Date()
     self.setHeader('date', date.toUTCString())
     var auth =
-      { key: opts.key
+    { key: opts.key
       , secret: opts.secret
       , verb: self.method.toUpperCase()
       , date: date
       , contentType: self.getHeader('content-type') || ''
       , md5: self.getHeader('content-md5') || ''
       , amazonHeaders: aws2.canonicalizeHeaders(self.headers)
-      }
+    }
     var path = self.uri.path
     if (opts.bucket && path) {
       auth.resource = '/' + opts.bucket + path
@@ -1423,10 +1427,10 @@ Request.prototype.destroy = function () {
 }
 
 Request.defaultProxyHeaderWhiteList =
-  Tunnel.defaultProxyHeaderWhiteList.slice()
+    Tunnel.defaultProxyHeaderWhiteList.slice()
 
 Request.defaultProxyHeaderExclusiveList =
-  Tunnel.defaultProxyHeaderExclusiveList.slice()
+    Tunnel.defaultProxyHeaderExclusiveList.slice()
 
 // Exports
 
