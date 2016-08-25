@@ -815,19 +815,16 @@ Request.prototype.onRequestError = function (error) {
 
 Request.prototype.onRequestResponse = function (response) {
   var self = this
-  dn('onRequestResponse', self.uri.href, response.statusCode, response.headers)
   response.on('end', function() {
     if (self.timing) {
       self.elapsedTime += (new Date().getTime() - self.startTime)
       debug('elapsed time', self.elapsedTime)
       response.elapsedTime = self.elapsedTime
     }
-    dn('response end', self.uri.href, response.statusCode, response.headers)
+
   })
 
   if (self._aborted) {
-    dn( 'Aborted', self.uri.href );
-    dn( 'Response: ', response );
     //response.xhr.resume();
     //response.resume()
     return
@@ -1052,11 +1049,9 @@ Request.prototype.abort = function () {
   self._aborted = true
 
   if (self.req) {
-    dn("abort URL: ", self.req);
     self.req.xhr.abort()
   }
   else if (self.response) {
-    dn("destroy response: ", self.response);
     self.response.destroy()
   }
 
